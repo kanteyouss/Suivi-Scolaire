@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProfesseurResponseDto {
+public class ProfesseurResponseDto implements ResponseDto {
     private Long id;
     private String nom;
     private String prenom;

@@ -13,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ClasseResponseDto {
+public class ClasseResponseDto implements ResponseDto {
     private Long id;
     private String nom;
     private String niveau;

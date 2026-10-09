@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NoteRequestDto {
+public class NoteRequestDto implements RequestDto {
     private Long id;
     private BigDecimal valeur;
     private Long inscriptionId;

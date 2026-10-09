@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MatiereResponseDto {
+public class MatiereResponseDto implements ResponseDto {
     private Long id;
     private String nom;
     private List<CoefficientResponseDto> coefficients;

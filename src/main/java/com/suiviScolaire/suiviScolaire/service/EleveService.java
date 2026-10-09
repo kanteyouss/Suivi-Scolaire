@@ -1,11 +1,8 @@
 package com.suiviScolaire.suiviScolaire.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.suiviScolaire.suiviScolaire.entity.Annee;
 import com.suiviScolaire.suiviScolaire.repository.AnneeRepository;
 import com.suiviScolaire.suiviScolaire.entity.Classe;
@@ -14,18 +11,19 @@ import com.suiviScolaire.suiviScolaire.entity.Eleve;
 import com.suiviScolaire.suiviScolaire.repository.EleveRepository;
 import com.suiviScolaire.suiviScolaire.dto.EleveRequestDto;
 import com.suiviScolaire.suiviScolaire.dto.EleveResponseDto;
+import com.suiviScolaire.suiviScolaire.dto.RequestDto;
+import com.suiviScolaire.suiviScolaire.dto.ResponseDto;
 import com.suiviScolaire.suiviScolaire.entity.Inscription;
 import com.suiviScolaire.suiviScolaire.repository.InscriptionRepository;
 
 /**
  * Service métier gérant les élèves.
- * Fournit les opérations CRUD, les conversions entité/DTO
- * et la gestion du rattachement à une classe via la table "inscription"
+ * Fournit la création, la modification, la suppression et les conversions entité/DTO.
+ * Le rattachement à une classe passe par la table "inscription"
  * (sans relation directe entre Eleve et Classe).
  */
 @Service
-@RequiredArgsConstructor
-public class EleveService {
+public class EleveService extends AbstractCrudService {
 
     private final EleveRepository eleveRepository;
     private final InscriptionRepository inscriptionRepository;
@@ -34,18 +32,25 @@ public class EleveService {
     private final ClasseService classeService;
 
     /**
-     * Convertit une entité élève en objet de réponse (sans la classe).
+     * Constructeur injectant les repositories et le service des classes.
      *
-     * @param eleve L'entité élève à convertir.
-     * @return EleveResponseDto Les détails de l'élève converti.
+     * @param eleveRepository le repository des élèves
+     * @param inscriptionRepository le repository des inscriptions
+     * @param classeRepository le repository des classes
+     * @param anneeRepository le repository des années scolaires
+     * @param classeService le service des classes (conversion)
      */
-    public EleveResponseDto toDto(Eleve eleve) {
-        return EleveResponseDto.builder()
-                .id(eleve.getId())
-                .nom(eleve.getNom())
-                .prenom(eleve.getPrenom())
-                .dateNaissance(eleve.getDateNaissance())
-                .build();
+    public EleveService(EleveRepository eleveRepository,
+                        InscriptionRepository inscriptionRepository,
+                        ClasseRepository classeRepository,
+                        AnneeRepository anneeRepository,
+                        ClasseService classeService) {
+        super(eleveRepository);
+        this.eleveRepository = eleveRepository;
+        this.inscriptionRepository = inscriptionRepository;
+        this.classeRepository = classeRepository;
+        this.anneeRepository = anneeRepository;
+        this.classeService = classeService;
     }
 
     /**
@@ -63,12 +68,43 @@ public class EleveService {
     }
 
     /**
+     * Convertit une entité élève en objet de réponse, avec sa classe.
+     *
+     * @param entity L'entité élève à convertir.
+     * @return ResponseDto Les détails de l'élève converti.
+     */
+    @Override
+    public ResponseDto toDto(Object entity) {
+        return toDto((Eleve) entity);
+    }
+
+    /**
+     * Convertit une entité élève en objet de réponse, avec sa classe.
+     *
+     * @param eleve L'entité élève à convertir.
+     * @return EleveResponseDto Les détails de l'élève converti.
+     */
+    public EleveResponseDto toDto(Eleve eleve) {
+        Classe classe = eleveRepository.findClassesByEleve(eleve.getId())
+                .stream().findFirst().orElse(null);
+        return EleveResponseDto.builder()
+                .id(eleve.getId())
+                .nom(eleve.getNom())
+                .prenom(eleve.getPrenom())
+                .dateNaissance(eleve.getDateNaissance())
+                .classe(classe == null ? null : classeService.toDto(classe))
+                .build();
+    }
+
+    /**
      * Inscrit un nouvel élève et le rattache à une classe (si fournie).
      *
-     * @param eleveRequest les informations de l'élève à créer
+     * @param requestDto les informations de l'élève à créer
      * @return l'élève créé
      */
-    public EleveResponseDto createEleve(EleveRequestDto eleveRequest) {
+    @Override
+    public ResponseDto create(RequestDto requestDto) {
+        EleveRequestDto eleveRequest = (EleveRequestDto) requestDto;
         Eleve eleve = eleveRepository.save(toEntity(eleveRequest));
         if (eleveRequest.getClasseId() != null) {
             Classe classe = classeRepository.findById(eleveRequest.getClasseId())
@@ -84,45 +120,15 @@ public class EleveService {
     }
 
     /**
-     * Récupère un élève à partir de son identifiant, avec sa classe.
-     *
-     * @param id L'identifiant de l'élève à récupérer.
-     * @return EleveResponseDto Les détails de l'élève récupéré.
-     */
-    public EleveResponseDto getEleveById(Long id) {
-        Eleve eleve = eleveRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Élève non trouvé"));
-        Classe classe = eleveRepository.findClassesByEleve(id).stream().findFirst().orElse(null);
-        return toDtoWithClasse(eleve, classe);
-    }
-
-    /**
-     * Récupère la liste de tous les élèves, avec leur classe (batch).
-     *
-     * @return List<EleveResponseDto> La liste des élèves récupérés.
-     */
-    public List<EleveResponseDto> getAllEleves() {
-        List<Eleve> eleves = eleveRepository.findAll();
-        List<Long> ids = eleves.stream().map(Eleve::getId).toList();
-        Map<Long, Classe> classes = new HashMap<>();
-        if (!ids.isEmpty()) {
-            for (Object[] row : inscriptionRepository.findClasseByEleveIds(ids)) {
-                classes.putIfAbsent((Long) row[0], (Classe) row[1]);
-            }
-        }
-        return eleves.stream()
-                .map(eleve -> toDtoWithClasse(eleve, classes.get(eleve.getId())))
-                .toList();
-    }
-
-    /**
      * Modifie un élève existant et, si une classe est fournie, change sa classe.
      *
      * @param id L'identifiant de l'élève à modifier.
-     * @param eleveRequest Les données de la requête pour modifier l'élève.
-     * @return EleveResponseDto Les détails de l'élève modifié.
+     * @param requestDto Les données de la requête pour modifier l'élève.
+     * @return ResponseDto Les détails de l'élève modifié.
      */
-    public EleveResponseDto updateEleveById(Long id, EleveRequestDto eleveRequest) {
+    @Override
+    public ResponseDto update(Long id, RequestDto requestDto) {
+        EleveRequestDto eleveRequest = (EleveRequestDto) requestDto;
         Eleve eleve = eleveRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Élève non trouvé"));
         eleve.setNom(eleveRequest.getNom());
@@ -132,19 +138,21 @@ public class EleveService {
         if (eleveRequest.getClasseId() != null) {
             changeClasse(eleve, eleveRequest.getClasseId(), eleveRequest.getAnneeId());
         }
-        return getEleveById(id);
+        return toDto(eleve);
     }
 
     /**
      * Supprime un élève ainsi que ses inscriptions (évite la violation de clé étrangère).
      *
      * @param id L'identifiant de l'élève à supprimer.
-     * @return EleveResponseDto Les détails de l'élève supprimé.
+     * @return ResponseDto Les détails de l'élève supprimé.
+     * @throws Throwable si l'élève à supprimer n'existe pas
      */
-    public EleveResponseDto deleteEleveById(Long id) {
+    @Override
+    public ResponseDto delete(Long id) throws Throwable {
         Eleve eleve = eleveRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Élève non trouvé"));
-        EleveResponseDto response = toDto(eleve);
+        ResponseDto response = toDto(eleve);
         inscriptionRepository.deleteAll(inscriptionRepository.findByEleveId(id));
         eleveRepository.deleteById(id);
         return response;
@@ -188,22 +196,5 @@ public class EleveService {
         }
         return anneeRepository.findTopByOrderByIdDesc()
                 .orElseThrow(() -> new RuntimeException("Aucune année scolaire disponible"));
-    }
-
-    /**
-     * Construit la réponse d'un élève en incluant sa classe.
-     *
-     * @param eleve L'entité élève.
-     * @param classe La classe de l'élève (peut être null).
-     * @return EleveResponseDto La réponse de l'élève.
-     */
-    private EleveResponseDto toDtoWithClasse(Eleve eleve, Classe classe) {
-        return EleveResponseDto.builder()
-                .id(eleve.getId())
-                .nom(eleve.getNom())
-                .prenom(eleve.getPrenom())
-                .dateNaissance(eleve.getDateNaissance())
-                .classe(classe == null ? null : classeService.toDto(classe))
-                .build();
     }
 }

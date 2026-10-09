@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EleveRequestDto {
+public class EleveRequestDto implements RequestDto {
     private Long id;
     private String nom;
     private String prenom;

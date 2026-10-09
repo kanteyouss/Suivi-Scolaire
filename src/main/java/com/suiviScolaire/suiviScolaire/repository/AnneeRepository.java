@@ -19,5 +19,4 @@ public interface AnneeRepository extends JpaRepository<Annee, Long> {
      * @return Optional<Annee> L'année la plus récente si elle existe.
      */
     Optional<Annee> findTopByOrderByIdDesc();
-
 }

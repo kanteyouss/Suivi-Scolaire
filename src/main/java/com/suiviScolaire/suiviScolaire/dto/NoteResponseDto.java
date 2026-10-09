@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NoteResponseDto {
+public class NoteResponseDto implements ResponseDto {
     private Long id;
     private BigDecimal valeur;
     private InscriptionResponseDto inscription;
