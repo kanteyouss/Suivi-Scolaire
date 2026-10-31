@@ -175,7 +175,6 @@ public ProfesseurService(ProfesseurRepository professeurRepository,
      * @throws NotFoundException si le professeur n'existe pas
      * @throws RessourceUtiliseeException si le professeur est encore affecté
      */
-    @Override
     public ResponseDto delete(Long id) {
         Professeur professeur = professeurRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));

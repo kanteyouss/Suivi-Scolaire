@@ -154,7 +154,6 @@ public class ClasseService extends AbstractCrudService {
      * @throws NotFoundException si la classe n'existe pas
      * @throws RessourceUtiliseeException si des élèves sont encore inscrits dans cette classe
      */
-    @Override
     public ResponseDto delete(Long id) {
         Classe classe = classeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));

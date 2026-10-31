@@ -26,6 +26,7 @@ import com.suiviScolaire.suiviScolaire.dto.ResponseDto;
 import com.suiviScolaire.suiviScolaire.entity.Inscription;
 import com.suiviScolaire.suiviScolaire.repository.InscriptionRepository;
 import com.suiviScolaire.suiviScolaire.repository.NoteRepository;
+import com.suiviScolaire.suiviScolaire.utils.response.Response;
 
 /**
  * Service métier gérant les élèves.
@@ -133,6 +134,25 @@ public class EleveService extends AbstractCrudService {
         return eleveRepository.findByNomContainingIgnoreCase(nom).stream()
                 .<ResponseDto>map(this::toDto)
                 .toList();
+    }
+
+    /**
+     * Récupère la liste paginée des élèves ou effectue une recherche filtrée par nom.
+     *
+     * @param page Numéro de la page (commence à 0).
+     * @param taille Nombre d'éléments par page.
+     * @param nom Nom ou fragment de nom à rechercher (optionnel).
+     * @return Réponse contenant les élèves ou la liste paginée.
+     */
+    public Response<ResponseDto> getAllOrSearch(int page, int taille, String nom) {
+        if (nom != null) {
+            if (nom.isBlank()) {
+                throw new RequeteInvalideException("Le nom de recherche ne peut pas être vide.");
+            }
+            return new Response<>(searchByNom(nom));
+        }
+        Page<ResponseDto> pageResult = getAll(page, taille);
+        return new Response<>(pageResult.getContent(), pageResult.getTotalElements(), pageResult.getTotalPages(), page, taille);
     }
 
     /**
@@ -256,7 +276,6 @@ public class EleveService extends AbstractCrudService {
      * @throws NotFoundException si l'élève n'existe pas
      * @throws RessourceUtiliseeException si l'élève possède des notes
      */
-    @Override
     public ResponseDto delete(Long id) {
         Eleve eleve = eleveRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));

@@ -2,6 +2,7 @@ package com.suiviScolaire.suiviScolaire.dto;
 
 import java.math.BigDecimal;
 import jakarta.validation.constraints.DecimalMin;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,11 +22,16 @@ import lombok.*;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class MatiereRequestDto implements RequestDto {
+public class MatiereRequestDto extends AbstractClean implements RequestDto {
     private Long id;
     @NotBlank(message = "Le libelle est obligatoire")
     private String libelle;
     @NotNull(message = "Le coefficient est obligatoire")
     @DecimalMin(value = "0", inclusive = false, message = "Le coefficient doit être strictement positif")
     private BigDecimal coefficient;
+
+    @JsonSetter("libelle")
+    public void setLibelle(String libelle) {
+        this.libelle = cleanText(libelle);
+    }
 }

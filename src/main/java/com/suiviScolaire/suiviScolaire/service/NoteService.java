@@ -225,7 +225,6 @@ public class NoteService extends AbstractCrudService {
      * @throws NotFoundException si la note n'existe pas
      * @throws IllegalArgumentException si le trimestre est clôturé
      */
-    @Override
     public ResponseDto delete(Long id) {
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
@@ -281,6 +280,9 @@ public class NoteService extends AbstractCrudService {
      * @throws NotFoundException si l'élève n'existe pas
      */
     public List<NotesParMatiereResponseDto> getNotesByEleve(Long eleveId, Integer trimestre) {
+        if (trimestre != null) {
+            validerTrimestre(trimestre);
+        }
         if (!eleveRepository.existsById(eleveId)) {
             throw new NotFoundException("Elève non trouvé");
         }
@@ -302,6 +304,7 @@ public class NoteService extends AbstractCrudService {
      * @throws RequeteInvalideException si la matière n'est pas enseignée dans cette classe
      */
     public ClasseNotesResponseDto getNotesByClasse(Long classeId, Long matiereId, Integer trimestre) {
+        validerTrimestre(trimestre);
         Classe classe = classeRepository.findById(classeId)
                 .orElseThrow(() -> new NotFoundException("Classe non trouvée"));
         Matiere matiere = matiereRepository.findById(matiereId)

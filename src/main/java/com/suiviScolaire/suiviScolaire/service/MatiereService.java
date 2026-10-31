@@ -149,7 +149,6 @@ public class MatiereService extends AbstractCrudService {
      * @throws NotFoundException si la matière n'existe pas
      * @throws RessourceUtiliseeException si la matière a des notes ou un professeur affecté
      */
-    @Override
     public ResponseDto delete(Long id) {
         Matiere matiere = matiereRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));

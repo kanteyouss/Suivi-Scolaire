@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NoteRequestDto implements RequestDto {
+public class NoteRequestDto extends AbstractClean implements RequestDto {
     private Long id;
     @NotNull(message = "La valeur est obligatoire")
     @DecimalMin(value = "0", message = "La valeur doit etre positive")

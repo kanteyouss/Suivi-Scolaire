@@ -424,7 +424,7 @@
                 "description": "Modification du nom/prénom/classe",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"matricule\": \"ELV-2026-001\",\n  \"nom\": \"Kouassi\",\n  \"prenom\": \"Jean-Marc\",\n  \"dateNaissance\": \"2013-03-12\",\n  \"classeId\": 2\n}",
+                  "raw": "{\n  \"matricule\": \"ELV-1\",\n  \"nom\": \"Kouassi\",\n  \"prenom\": \"Jean-Marc\",\n  \"dateNaissance\": \"2013-01-01\",\n  \"classeId\": 2\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1282,13 +1282,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/classes/2/notes?matiere=2&trimestre=1",
+                  "raw": "{{baseUrl}}/classes/1/notes?matiere=2&trimestre=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "classes",
-                    "2",
+                    "1",
                     "notes"
                   ],
                   "query": [
@@ -1338,13 +1338,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/classes/1/notes?matiere=2&trimestre=1",
+                  "raw": "{{baseUrl}}/classes/2/notes?matiere=2&trimestre=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "classes",
-                    "1",
+                    "2",
                     "notes"
                   ],
                   "query": [
@@ -1718,7 +1718,7 @@
                 "method": "POST",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/trimestres/1/reouverture?motif=Saisie tardive des notes de rattrapage&auteur=responsable_scolarite",
+                  "raw": "{{baseUrl}}/trimestres/1/reouverture?motif=Saisie%20tardive%20des%20notes%20de%20rattrapage&auteur=responsable_scolarite",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -1748,7 +1748,7 @@
                 "method": "POST",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/trimestres/1/reouverture?motif=Motif court",
+                  "raw": "{{baseUrl}}/trimestres/1/reouverture?motif=Motif%20court",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -1867,13 +1867,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/eleves/15/moyenne-generale?trimestre=1",
+                  "raw": "{{baseUrl}}/eleves/12/moyenne-generale?trimestre=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "eleves",
-                    "15",
+                    "12",
                     "moyenne-generale"
                   ],
                   "query": [

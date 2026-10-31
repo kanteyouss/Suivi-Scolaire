@@ -1,5 +1,6 @@
 package com.suiviScolaire.suiviScolaire.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +15,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProfesseurRequestDto implements RequestDto {
+public class ProfesseurRequestDto extends AbstractClean implements RequestDto {
     private Long id;
     @NotBlank(message = "Le nom est obligatoire")
     private String nom;
@@ -26,4 +27,19 @@ public class ProfesseurRequestDto implements RequestDto {
     @NotNull(message = "La matière principale est obligatoire")
     @Positive(message = "L identifiant de la matière doit être positif")
     private Long matiereId;
+
+    @JsonSetter("nom")
+    public void setNom(String nom) {
+        this.nom = cleanText(nom);
+    }
+
+    @JsonSetter("prenom")
+    public void setPrenom(String prenom) {
+        this.prenom = cleanText(prenom);
+    }
+
+    @JsonSetter("email")
+    public void setEmail(String email) {
+        this.email = cleanText(email);
+    }
 }
